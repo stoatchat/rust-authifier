@@ -45,6 +45,12 @@ pub async fn test_smtp_config() -> Config {
                     url: "".into(),
                     html: None,
                 },
+                reset_existing: Template {
+                    title: "reset_existing".into(),
+                    text: "[[{{url}}]]".into(),
+                    url: "".into(),
+                    html: None,
+                },
                 deletion: Template {
                     title: "deletion".into(),
                     text: "[[{{url}}]]".into(),

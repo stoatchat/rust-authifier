@@ -1,5 +1,7 @@
 use std::collections::HashSet;
 
+use sha1::Digest;
+
 use crate::{Error, Result};
 
 #[derive(Default, Serialize, Deserialize, Clone)]
@@ -13,6 +15,9 @@ pub enum PasswordScanning {
     #[cfg(feature = "pwned100k")]
     #[default]
     Top100k,
+    /// easypwned locally-hosted HIBP database API
+    #[cfg(feature = "easypwned")]
+    EasyPwned { endpoint: String },
     /// Use the Have I Been Pwned? API
     #[cfg(feature = "have_i_been_pwned")]
     HIBP { api_key: String },
@@ -43,6 +48,31 @@ impl PasswordScanning {
                     Err(Error::CompromisedPassword)
                 } else {
                     Ok(())
+                }
+            }
+            #[cfg(feature = "easypwned")]
+            PasswordScanning::EasyPwned { endpoint } => {
+                let mut hasher = sha1::Sha1::new();
+                hasher.update(password);
+                let pwd_hash = hasher.finalize();
+
+                #[derive(Deserialize)]
+                struct EasyPwnedResult {
+                    secure: bool,
+                }
+
+                let result = match reqwest::get(format!("{endpoint}/hash/{pwd_hash:#02x}")).await {
+                    Ok(response) => match response.json::<EasyPwnedResult>().await {
+                        Ok(result) => Ok(result.secure),
+                        Err(_) => Err(Error::InternalError),
+                    },
+                    Err(_) => Err(Error::InternalError),
+                };
+
+                match result {
+                    Ok(true) => Ok(()),
+                    // todo: report Err(_) case; ideally we merge into Revolt backend at some point, at that point use create_internal_error! macro
+                    _ => Err(Error::CompromisedPassword),
                 }
             }
             #[cfg(feature = "pwned100k")]

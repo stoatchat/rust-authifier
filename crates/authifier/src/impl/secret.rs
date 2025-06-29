@@ -28,7 +28,8 @@ impl Secret {
             DecodingKey::from_secret(secret),
         );
 
-        validation.set_required_spec_claims(&["sub", "exp", "aud", "iss"]);
+        validation.set_required_spec_claims(&["sub", "exp", "iss"]);
+
         validation.validate_aud = false;
         validation.validate_nbf = false;
 

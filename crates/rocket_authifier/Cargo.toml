@@ -18,7 +18,8 @@ example = [
     "mongodb",
 ]
 
-default = []
+# default = []
+default = ["example"]
 
 [dependencies]
 authifier = { version = "1.0.15", path = "../authifier", features = [
@@ -51,4 +52,3 @@ async-std = { version = "1.9.0", features = [
     "tokio1",
     "attributes",
 ], optional = true }
-# Authifier

@@ -32,8 +32,10 @@ pub mod util;
 pub use config::Config;
 pub use database::{Database, Migration};
 pub use events::AuthifierEvent;
+pub use webauthn_rs as webauthn;
 
 use async_std::channel::Sender;
+use webauthn_rs::Webauthn;
 
 /// Authifier state
 #[derive(Default, Clone)]
@@ -41,6 +43,7 @@ pub struct Authifier {
     pub config: Config,
     pub database: Database,
     pub event_channel: Option<Sender<AuthifierEvent>>,
+    pub webauthn: Option<Webauthn>
 }
 
 impl Authifier {

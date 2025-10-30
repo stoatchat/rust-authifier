@@ -1,6 +1,8 @@
-use self::totp::Totp;
+use webauthn_rs::prelude::PublicKeyCredential;
+use self::{totp::Totp, webauthn::Webauthn};
 
 pub mod totp;
+pub mod webauthn;
 
 /// Whether a boolean is false
 // fn is_false(t: &bool) -> bool {
@@ -30,6 +32,9 @@ pub struct MultiFactorAuthentication {
     #[serde(skip_serializing_if = "Totp::is_empty", default)]
     pub totp_token: Totp,
 
+    #[serde(skip_serializing_if = "Webauthn::is_empty", default)]
+    pub webauthn: Webauthn,
+
     /// Security Key MFA token, enabled if present
     /// (2-Factor)
     // #[serde(skip_serializing_if = "Option::is_none")]
@@ -47,6 +52,7 @@ pub enum MFAMethod {
     Password,
     Recovery,
     Totp,
+    Webauthn,
 }
 
 /// MFA response
@@ -57,4 +63,8 @@ pub enum MFAResponse {
     Password { password: String },
     Recovery { recovery_code: String },
     Totp { totp_code: String },
+    Webauthn {
+        #[cfg_attr(feature = "schemas", schemars(with="serde_json::Value"))]
+        webauthn: PublicKeyCredential
+    },
 }

@@ -33,6 +33,8 @@ pub enum Error {
     LockedOut,
 
     TotpAlreadyEnabled,
+    KeyAlreadyExists,
+    InvalidKey,
     DisallowedMFAMethod,
 }
 

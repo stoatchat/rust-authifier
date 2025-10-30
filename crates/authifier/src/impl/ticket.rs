@@ -16,6 +16,7 @@ impl MFATicket {
             validated,
             authorised: false,
             last_totp_code: None,
+            webauthn_challenge: None
         }
     }
 

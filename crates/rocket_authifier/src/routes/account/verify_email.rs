@@ -7,7 +7,7 @@ use authifier::{
 };
 use rocket::{serde::json::Json, State};
 
-#[derive(Serialize, Deserialize, JsonSchema, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, JsonSchema, PartialEq, Debug)]
 #[serde(untagged)]
 pub enum ResponseVerify {
     NoTicket,

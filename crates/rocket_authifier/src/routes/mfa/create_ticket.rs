@@ -1,7 +1,7 @@
 //! Create a new MFA ticket or validate an existing one.
 //! PUT /mfa/ticket
 use authifier::models::{Account, MFAResponse, MFATicket, UnvalidatedTicket};
-use authifier::{Authifier, Error, Result};
+use authifier::{Authifier, Error, Result, webauthn::Webauthn};
 use rocket::serde::json::Json;
 use rocket::State;
 
@@ -12,12 +12,15 @@ use rocket::State;
 #[put("/ticket", data = "<data>")]
 pub async fn create_ticket(
     authifier: &State<Authifier>,
+    webauthn: &State<Webauthn>,
     account: Option<Account>,
     existing_ticket: Option<UnvalidatedTicket>,
     data: Json<MFAResponse>,
 ) -> Result<Json<MFATicket>> {
+    let existing_ticket = existing_ticket.map(|inner| inner.0);
+
     // Find the relevant account
-    let mut account = match (account, existing_ticket) {
+    let mut account = match (account, existing_ticket.clone()) {
         (Some(_), Some(_)) => return Err(Error::OperationFailed),
         (Some(account), _) => account,
         (_, Some(ticket)) => {
@@ -29,7 +32,7 @@ pub async fn create_ticket(
 
     // Validate the MFA response
     account
-        .consume_mfa_response(authifier, data.into_inner(), None)
+        .consume_mfa_response(authifier, webauthn, data.into_inner(), existing_ticket)
         .await?;
 
     // Create a new ticket for this account

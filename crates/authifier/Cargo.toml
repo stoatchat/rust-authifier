@@ -30,7 +30,7 @@ default = ["async-std-runtime", "database-mongodb", "default_inbuilts"]
 [dependencies]
 # Lang
 log = "0.4"
-ulid = { version = "0.5.0", features = ["serde"] }
+ulid = { version = "0.5.0", features = ["serde", "uuid"] }
 rand = "0.8.5"
 regex = "1.3.9"
 nanoid = "0.4.0"
@@ -79,6 +79,10 @@ rocket = { version = "0.5.1", default-features = false, features = [
 # Security
 totp-lite = "2.0.0"
 rust-argon2 = "1.0.0"
+webauthn-rs = { version = "0.5.3", features = [
+    "danger-allow-state-serialisation",
+] }
+webauthn-rs-device-catalog = "0.5.0-20230418"
 
 # Email
 lettre = "0.10.0-alpha.4"

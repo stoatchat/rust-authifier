@@ -5,9 +5,12 @@ use std::time::Duration;
 
 use authifier::models::{EmailVerification, Lockout, MFAMethod, MFAResponse, MFATicket, Session};
 use authifier::util::normalise_email;
-use authifier::{Authifier, Error, Result};
+use authifier::{
+    webauthn::{prelude::RequestChallengeResponse, Webauthn},
+    Authifier, Error, Result,
+};
 use iso8601_timestamp::Timestamp;
-use rocket::serde::json::Json;
+use rocket::serde::json::{Json, Value};
 use rocket::State;
 
 /// # Login Data
@@ -43,6 +46,9 @@ pub enum ResponseLogin {
     MFA {
         ticket: String,
         allowed_methods: Vec<MFAMethod>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[schemars(with="Value")]
+        webauthn_challenge: Option<RequestChallengeResponse>,
     },
     Disabled {
         user_id: String,
@@ -56,6 +62,7 @@ pub enum ResponseLogin {
 #[post("/login", data = "<data>")]
 pub async fn login(
     authifier: &State<Authifier>,
+    webauthn: &State<Webauthn>,
     data: Json<DataLogin>,
 ) -> Result<Json<ResponseLogin>> {
     let (account, name) = match data.into_inner() {
@@ -142,14 +149,25 @@ pub async fn login(
                 // Check whether an MFA step is required
                 if account.mfa.is_active() {
                     // Create a new ticket
-                    let mut ticket = MFATicket::new(account.id, false);
+                    let mut ticket = MFATicket::new(account.id.clone(), false);
                     ticket.populate(&account.mfa).await;
                     ticket.save(authifier).await?;
+
+                    let webauthn_challenge = if account.mfa.webauthn.is_enabled() {
+                        let challenge = account.mfa.webauthn.generate_auth_challenge(ticket.id.clone(), webauthn)?;
+
+                        account.save(authifier).await?;
+
+                        Some(challenge)
+                    } else {
+                        None
+                    };
 
                     // Return applicable methods
                     return Ok(Json(ResponseLogin::MFA {
                         ticket: ticket.token,
                         allowed_methods: account.mfa.get_methods(),
+                        webauthn_challenge,
                     }));
                 }
 
@@ -176,7 +194,7 @@ pub async fn login(
             // Verify the MFA response
             if let Some(mfa_response) = mfa_response {
                 account
-                    .consume_mfa_response(authifier, mfa_response, Some(ticket))
+                    .consume_mfa_response(authifier, webauthn, mfa_response, Some(ticket))
                     .await?;
             } else if !ticket.authorised {
                 return Err(Error::InvalidToken);

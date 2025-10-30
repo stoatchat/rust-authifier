@@ -4,11 +4,12 @@ use crate::{
 };
 
 mod totp;
+mod webauthn;
 
 impl MultiFactorAuthentication {
     // Check whether MFA is in-use
     pub fn is_active(&self) -> bool {
-        matches!(self.totp_token, Totp::Enabled { .. })
+        matches!(self.totp_token, Totp::Enabled { .. }) || self.webauthn.is_enabled()
     }
 
     // Check whether there are still usable recovery codes
@@ -18,17 +19,25 @@ impl MultiFactorAuthentication {
 
     // Get available MFA methods
     pub fn get_methods(&self) -> Vec<MFAMethod> {
+        let mut methods = Vec::new();
+
         if let Totp::Enabled { .. } = self.totp_token {
-            let mut methods = vec![MFAMethod::Totp];
+            methods.push(MFAMethod::Totp);
+        };
 
-            if self.has_recovery() {
-                methods.push(MFAMethod::Recovery);
-            }
-
-            methods
-        } else {
-            vec![MFAMethod::Password]
+        if self.webauthn.is_enabled() {
+            methods.push(MFAMethod::Webauthn);
         }
+
+        if self.has_recovery() {
+            methods.push(MFAMethod::Recovery);
+        }
+
+        if methods.is_empty() {
+            methods.push(MFAMethod::Password)
+        };
+
+        methods
     }
 
     // Generate new recovery codes

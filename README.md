@@ -13,21 +13,21 @@
 
 ## Play around with Authifier API
 
-You can play around with the API by using the provided example and using Swagger:
+You can play around with the API by using the provided example and using Scalar:
 
 ```bash
 # Clone the project
-git clone https://github.com/insertish/authifier
+git clone https://github.com/stoatchat/rust-authifier
 cd authifier
 
 # Bring up MongoDB
 docker-compose up -d database
 
 # Start the example
-cargo run --example rocket_mongodb --features example
+cargo run --example rocket_mongodb
 ```
 
-Now you can navigate to http://localhost:8000/swagger!
+Now you can navigate to http://localhost:8000/scalar!
 
 ## Usage
 
@@ -35,7 +35,7 @@ Getting started is very simple, first add Authifier to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-authifier = { version = "1.0", features = [ "rocket_impl", "okapi_impl", "async-std-runtime", "database-mongodb" ] }
+authifier = { version = "1.0", features = [ "rocket_impl", "utoipa", "async-std-runtime", "database-mongodb" ] }
 rocket_authifier = { version = "1.0" }
 
 # For the example below, you also need:
@@ -82,9 +82,9 @@ async fn rocket() -> _ {
     // Attach the configuration as state
     .manage(authifier)
     // Mount authentication routes
-    .mount("/auth/account", rocket_authifier::routes::account::routes().0)
-    .mount("/auth/session", rocket_authifier::routes::session::routes().0)
-    .mount("/auth/mfa", rocket_authifier::routes::mfa::routes().0)
+    .mount("/auth/account", rocket_authifier::routes::account::routes())
+    .mount("/auth/session", rocket_authifier::routes::session::routes())
+    .mount("/auth/mfa", rocket_authifier::routes::mfa::routes())
 }
 ```
 

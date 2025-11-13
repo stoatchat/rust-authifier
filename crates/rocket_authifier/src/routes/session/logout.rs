@@ -1,20 +1,26 @@
 //! Logout of current session
 //! POST /session/logout
-use authifier::{models::Session, Authifier, Result};
+use authifier::{Authifier, Error, Result, models::Session};
 use rocket::State;
 use rocket_empty::EmptyResponse;
 
 /// # Logout
 ///
 /// Delete current session.
-#[openapi(tag = "Session")]
+#[utoipa::path(
+    tag = "Session",
+    security(("User Token" = [])),
+    responses(
+        (status = 204),
+        (status = "default", body = Error)
+    )
+)]
 #[post("/logout")]
 pub async fn logout(authifier: &State<Authifier>, session: Session) -> Result<EmptyResponse> {
     session.delete(authifier).await.map(|_| EmptyResponse)
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use crate::test::*;
 

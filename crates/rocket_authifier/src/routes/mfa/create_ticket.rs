@@ -8,7 +8,14 @@ use rocket::State;
 /// # Create MFA ticket
 ///
 /// Create a new MFA ticket or validate an existing one.
-#[openapi(tag = "MFA")]
+#[utoipa::path(
+    tag = "MFA",
+    security(("User Token" = []), ("MFA Ticket" = [])),
+    responses(
+        (status = 200, body = MFAResponse),
+        (status = "default", body = Error)
+    )
+)]
 #[put("/ticket", data = "<data>")]
 pub async fn create_ticket(
     authifier: &State<Authifier>,
@@ -39,7 +46,6 @@ pub async fn create_ticket(
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use crate::test::*;
 

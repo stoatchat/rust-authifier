@@ -1,17 +1,23 @@
-//! Run example with `cargo run --example rocket_mongodb --features example`
-
-use revolt_okapi::openapi3::OpenApi;
+//! Run example with `cargo run --example rocket_mongodb`
 
 #[macro_use]
 extern crate rocket;
 
-#[cfg(feature = "example")]
 #[launch]
 async fn rocket() -> _ {
     use authifier::database::MongoDb;
     use authifier::Migration;
     use mongodb::{options::ClientOptions, Client};
-    use revolt_rocket_okapi::{mount_endpoints_and_merged_docs, settings::OpenApiSettings};
+    use utoipa::OpenApi;
+    use utoipa_scalar::{Scalar, Servable};
+
+    #[derive(OpenApi)]
+    #[openapi(nest(
+        (path = "/auth/account", api = rocket_authifier::routes::account::ApiDoc),
+        (path = "/auth/session", api = rocket_authifier::routes::session::ApiDoc),
+        (path = "/auth/mfa", api = rocket_authifier::routes::mfa::ApiDoc),
+    ))]
+    struct ApiDoc;
 
     let client_options = ClientOptions::parse("mongodb://localhost:27017")
         .await
@@ -29,36 +35,11 @@ async fn rocket() -> _ {
         ..Default::default()
     };
 
-    let mut rocket = rocket::build();
-    let settings = OpenApiSettings::default();
-
-    mount_endpoints_and_merged_docs! {
-        rocket, "/".to_owned(), settings,
-        "/" => (vec![], custom_openapi_spec()),
-        "/auth/account" => rocket_authifier::routes::account::routes(),
-        "/auth/session" => rocket_authifier::routes::session::routes(),
-        "/auth/mfa" => rocket_authifier::routes::mfa::routes(),
-    };
-
-    rocket.manage(authifier).mount(
-        "/swagger/",
-        revolt_rocket_okapi::swagger_ui::make_swagger_ui(
-            &revolt_rocket_okapi::swagger_ui::SwaggerUIConfig {
-                url: "../openapi.json".to_owned(),
-                ..Default::default()
-            },
-        ),
-    )
-}
-
-#[cfg(not(feature = "example"))]
-fn main() {
-    panic!("Enable `example` feature to run this example!");
-}
-
-fn custom_openapi_spec() -> OpenApi {
-    OpenApi {
-        openapi: OpenApi::default_version(),
-        ..Default::default()
-    }
+    rocket::build()
+        .configure(rocket::Config { port: 8002, ..Default::default() })
+        .mount("/auth/account", rocket_authifier::routes::account::routes())
+        .mount("/auth/session", rocket_authifier::routes::session::routes())
+        .mount("/auth/mfa", rocket_authifier::routes::mfa::routes())
+        .mount("/", Scalar::with_url("/scalar", ApiDoc::openapi()))
+        .manage(authifier)
 }

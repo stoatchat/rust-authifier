@@ -1,14 +1,21 @@
 //! Re-generate recovery codes for an account.
 //! PATCH /mfa/recovery
 use authifier::models::{Account, ValidatedTicket};
-use authifier::{Authifier, Result};
+use authifier::{Authifier, Error, Result};
 use rocket::serde::json::Json;
 use rocket::State;
 
 /// # Generate Recovery Codes
 ///
 /// Re-generate recovery codes for an account.
-#[openapi(tag = "MFA")]
+#[utoipa::path(
+    tag = "MFA",
+    security(("User Token" = [], "MFA Ticket" = [])),
+    responses(
+        (status = 200, body = inline(Vec<String>)),
+        (status = "default", body = Error)
+    )
+)]
 #[patch("/recovery")]
 pub async fn generate_recovery(
     authifier: &State<Authifier>,
@@ -26,7 +33,6 @@ pub async fn generate_recovery(
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use crate::test::*;
 

@@ -1,16 +1,16 @@
 //! Verify an account
 //! POST /verify/<code>
 use authifier::{
-    models::{EmailVerification, MFATicket},
-    util::normalise_email,
-    Authifier, Result,
+    Authifier, Error, Result, models::{EmailVerification, MFATicket}, util::normalise_email
 };
 use rocket::{serde::json::Json, State};
 
-#[derive(Serialize, Deserialize, JsonSchema, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, ToSchema, PartialEq, Eq, Debug)]
 #[serde(untagged)]
 pub enum ResponseVerify {
+    #[schema(title = "No Ticket")]
     NoTicket,
+    #[schema(title = "Ticket")]
     WithTicket {
         /// Authorised MFA ticket, can be used to log in
         ticket: MFATicket,
@@ -20,7 +20,14 @@ pub enum ResponseVerify {
 /// # Verify Email
 ///
 /// Verify an email address.
-#[openapi(tag = "Account")]
+#[utoipa::path(
+    tag = "Account",
+    security(("User Token" = [])),
+    responses(
+        (status = 200, body = ResponseVerify),
+        (status = "default", body = Error)
+    )
+)]
 #[post("/verify/<code>")]
 pub async fn verify_email(
     authifier: &State<Authifier>,
@@ -53,7 +60,6 @@ pub async fn verify_email(
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use chrono::Duration;
     use iso8601_timestamp::Timestamp;

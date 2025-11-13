@@ -1,15 +1,21 @@
 //! Fetch recovery codes for an account.
 //! POST /mfa/recovery
 use authifier::{
-    models::{Account, ValidatedTicket},
-    Result,
+    Error, Result, models::{Account, ValidatedTicket}
 };
 use rocket::serde::json::Json;
 
 /// # Fetch Recovery Codes
 ///
 /// Fetch recovery codes for an account.
-#[openapi(tag = "MFA")]
+#[utoipa::path(
+    tag = "MFA",
+    security(("User Token" = [], "MFA Ticket" = [])),
+    responses(
+        (status = 200, body = inline(Vec<String>)),
+        (status = "default", body = Error)
+    )
+)]
 #[post("/recovery")]
 pub async fn fetch_recovery(
     account: Account,
@@ -19,7 +25,6 @@ pub async fn fetch_recovery(
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use crate::test::*;
 

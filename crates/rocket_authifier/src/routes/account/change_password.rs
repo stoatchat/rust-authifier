@@ -2,13 +2,13 @@
 //! PATCH /account/change/password
 use authifier::models::Account;
 use authifier::util::hash_password;
-use authifier::{Authifier, Result};
+use authifier::{Authifier, Error, Result};
 use rocket::serde::json::Json;
 use rocket::State;
 use rocket_empty::EmptyResponse;
 
 /// # Change Data
-#[derive(Serialize, Deserialize, JsonSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct DataChangePassword {
     /// New password
     pub password: String,
@@ -19,7 +19,14 @@ pub struct DataChangePassword {
 /// # Change Password
 ///
 /// Change the current account password.
-#[openapi(tag = "Account")]
+#[utoipa::path(
+    tag = "Account",
+    security(("User Token" = [])),
+    responses(
+        (status = 204),
+        (status = "default", body = Error)
+    )
+)]
 #[patch("/change/password", data = "<data>")]
 pub async fn change_password(
     authifier: &State<Authifier>,
@@ -46,7 +53,6 @@ pub async fn change_password(
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use crate::test::*;
 

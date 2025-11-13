@@ -1,5 +1,5 @@
 use rocket::Route;
-use revolt_rocket_okapi::revolt_okapi::openapi3::OpenApi;
+use crate::SecurityAddon;
 
 pub mod change_email;
 pub mod change_password;
@@ -13,8 +13,27 @@ pub mod resend_verification;
 pub mod send_password_reset;
 pub mod verify_email;
 
-pub fn routes() -> (Vec<Route>, OpenApi) {
-    openapi_get_routes_spec![
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        create_account::create_account,
+        resend_verification::resend_verification,
+        confirm_deletion::confirm_deletion,
+        fetch_account::fetch_account,
+        delete_account::delete_account,
+        disable_account::disable_account,
+        change_password::change_password,
+        change_email::change_email,
+        verify_email::verify_email,
+        password_reset::password_reset,
+        send_password_reset::send_password_reset,
+    ),
+    modifiers(&SecurityAddon)
+)]
+pub struct ApiDoc;
+
+pub fn routes() -> Vec<Route> {
+    routes![
         create_account::create_account,
         resend_verification::resend_verification,
         confirm_deletion::confirm_deletion,

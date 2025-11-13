@@ -1,13 +1,13 @@
 //! Confirm a password reset.
 //! PATCH /account/reset_password
 use authifier::util::hash_password;
-use authifier::{Authifier, Result};
+use authifier::{Authifier, Error, Result};
 use rocket::serde::json::Json;
 use rocket::State;
 use rocket_empty::EmptyResponse;
 
 /// # Password Reset
-#[derive(Serialize, Deserialize, JsonSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct DataPasswordReset {
     /// Reset token
     pub token: String,
@@ -23,7 +23,13 @@ pub struct DataPasswordReset {
 /// # Password Reset
 ///
 /// Confirm password reset and change the password.
-#[openapi(tag = "Account")]
+#[utoipa::path(
+    tag = "Account",
+    responses(
+        (status = 204),
+        (status = "default", body = Error)
+    )
+)]
 #[patch("/reset_password", data = "<data>")]
 pub async fn password_reset(
     authifier: &State<Authifier>,
@@ -61,7 +67,6 @@ pub async fn password_reset(
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use chrono::Duration;
     use iso8601_timestamp::Timestamp;

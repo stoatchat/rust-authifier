@@ -42,7 +42,7 @@ pub struct MultiFactorAuthentication {
 
 /// MFA method
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "schemas", derive(JsonSchema))]
+#[cfg_attr(feature = "utoipa", derive(ToSchema))]
 pub enum MFAMethod {
     Password,
     Recovery,
@@ -51,10 +51,13 @@ pub enum MFAMethod {
 
 /// MFA response
 #[derive(Debug, Serialize, Deserialize)]
-#[cfg_attr(feature = "schemas", derive(JsonSchema))]
+#[cfg_attr(feature = "utoipa", derive(ToSchema))]
 #[serde(untagged)]
 pub enum MFAResponse {
+    #[cfg_attr(feature = "utoipa", schema(title = "Password"))]
     Password { password: String },
+    #[cfg_attr(feature = "utoipa", schema(title = "Recovery"))]
     Recovery { recovery_code: String },
+    #[cfg_attr(feature = "utoipa", schema(title = "Totp"))]
     Totp { totp_code: String },
 }

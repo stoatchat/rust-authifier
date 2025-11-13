@@ -1,11 +1,11 @@
 //! Fetch all sessions
 //! GET /session/all
 use authifier::models::Session;
-use authifier::{Authifier, Result};
+use authifier::{Authifier, Error, Result};
 use rocket::serde::json::Json;
 use rocket::State;
 
-#[derive(Serialize, Deserialize, JsonSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct SessionInfo {
     #[serde(rename = "_id")]
     pub id: String,
@@ -24,7 +24,14 @@ impl From<Session> for SessionInfo {
 /// # Fetch Sessions
 ///
 /// Fetch all sessions associated with this account.
-#[openapi(tag = "Session")]
+#[utoipa::path(
+    tag = "Session",
+    security(("User Token" = [])),
+    responses(
+        (status = 200, body = inline(Vec<SessionInfo>)),
+        (status = "default", body = Error)
+    )
+)]
 #[get("/all")]
 pub async fn fetch_all(
     authifier: &State<Authifier>,
@@ -39,7 +46,6 @@ pub async fn fetch_all(
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use crate::test::*;
 

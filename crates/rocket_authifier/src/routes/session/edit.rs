@@ -8,7 +8,7 @@ use rocket::State;
 use super::fetch_all::SessionInfo;
 
 /// # Edit Data
-#[derive(Serialize, Deserialize, JsonSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct DataEditSession {
     /// Session friendly name
     pub friendly_name: String,
@@ -17,7 +17,14 @@ pub struct DataEditSession {
 /// # Edit Session
 ///
 /// Edit current session information.
-#[openapi(tag = "Session")]
+#[utoipa::path(
+    tag = "Session",
+    security(("User Token" = [])),
+    responses(
+        (status = 200, body = SessionInfo),
+        (status = "default", body = Error)
+    )
+)]
 #[patch("/<id>", data = "<data>")]
 pub async fn edit(
     authifier: &State<Authifier>,
@@ -42,7 +49,6 @@ pub async fn edit(
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use crate::{routes::session::fetch_all::SessionInfo, test::*};
 

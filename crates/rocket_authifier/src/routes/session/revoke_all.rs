@@ -1,8 +1,7 @@
 //! Revoke all sessions
 //! DELETE /session/all
 use authifier::{
-    models::{Account, Session},
-    Authifier, Result,
+    Authifier, Error, Result, models::{Account, Session}
 };
 use rocket::State;
 use rocket_empty::EmptyResponse;
@@ -10,7 +9,14 @@ use rocket_empty::EmptyResponse;
 /// # Delete All Sessions
 ///
 /// Delete all active sessions, optionally including current one.
-#[openapi(tag = "Session")]
+#[utoipa::path(
+    tag = "Session",
+    security(("User Token" = [])),
+    responses(
+        (status = 204),
+        (status = "default", body = Error)
+    )
+)]
 #[delete("/all?<revoke_self>")]
 pub async fn revoke_all(
     authifier: &State<Authifier>,
@@ -31,7 +37,6 @@ pub async fn revoke_all(
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use crate::test::*;
 

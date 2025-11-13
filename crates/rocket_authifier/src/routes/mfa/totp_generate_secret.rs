@@ -1,12 +1,12 @@
 //! Generate a new secret for TOTP.
 //! POST /mfa/totp
 use authifier::models::{Account, ValidatedTicket};
-use authifier::{Authifier, Result};
+use authifier::{Authifier, Error, Result};
 use rocket::serde::json::Json;
 use rocket::State;
 
 /// # Totp Secret
-#[derive(Serialize, Deserialize, JsonSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct ResponseTotpSecret {
     secret: String,
 }
@@ -14,7 +14,14 @@ pub struct ResponseTotpSecret {
 /// # Generate TOTP Secret
 ///
 /// Generate a new secret for TOTP.
-#[openapi(tag = "MFA")]
+#[utoipa::path(
+    tag = "MFA",
+    security(("User Token" = [], "MFA Ticket" = [])),
+    responses(
+        (status = 200, body = ResponseTotpSecret),
+        (status = "default", body = Error)
+    )
+)]
 #[post("/totp")]
 pub async fn totp_generate_secret(
     authifier: &State<Authifier>,
@@ -32,7 +39,6 @@ pub async fn totp_generate_secret(
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use crate::routes::mfa::totp_generate_secret::ResponseTotpSecret;
     use crate::test::*;

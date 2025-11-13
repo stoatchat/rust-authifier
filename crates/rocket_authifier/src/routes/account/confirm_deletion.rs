@@ -1,12 +1,12 @@
 //! Confirm an account deletion.
 //! PUT /account/delete
-use authifier::{Authifier, Result};
+use authifier::{Authifier, Error, Result};
 use rocket::serde::json::Json;
 use rocket::State;
 use rocket_empty::EmptyResponse;
 
 /// # Account Deletion Token
-#[derive(Serialize, Deserialize, JsonSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct DataAccountDeletion {
     /// Deletion token
     pub token: String,
@@ -15,7 +15,14 @@ pub struct DataAccountDeletion {
 /// # Confirm Account Deletion
 ///
 /// Schedule an account for deletion by confirming the received token.
-#[openapi(tag = "Account")]
+#[utoipa::path(
+    tag = "Account",
+    security(("User Token" = [])),
+    responses(
+        (status = 204),
+        (status = "default", body = Error)
+    )
+)]
 #[put("/delete", data = "<data>")]
 pub async fn confirm_deletion(
     authifier: &State<Authifier>,
@@ -37,7 +44,6 @@ pub async fn confirm_deletion(
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use chrono::Duration;
     use iso8601_timestamp::Timestamp;

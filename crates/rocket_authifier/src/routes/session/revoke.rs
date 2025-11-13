@@ -7,7 +7,14 @@ use rocket_empty::EmptyResponse;
 /// # Revoke Session
 ///
 /// Delete a specific active session.
-#[openapi(tag = "Session")]
+#[utoipa::path(
+    tag = "Session",
+    security(("User Token" = [])),
+    responses(
+        (status = 204),
+        (status = "default", body = Error)
+    )
+)]
 #[delete("/<id>")]
 pub async fn revoke(
     authifier: &State<Authifier>,
@@ -24,7 +31,6 @@ pub async fn revoke(
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use crate::test::*;
 

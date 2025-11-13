@@ -2,7 +2,7 @@
 //! POST /account/disable
 use authifier::{
     models::{Account, ValidatedTicket},
-    Authifier, Result,
+    Authifier, Error, Result,
 };
 use rocket::State;
 use rocket_empty::EmptyResponse;
@@ -10,7 +10,14 @@ use rocket_empty::EmptyResponse;
 /// # Disable Account
 ///
 /// Disable an account.
-#[openapi(tag = "Account")]
+#[utoipa::path(
+    tag = "Account",
+    security(("User Token" = [], "MFA Ticket" = [])),
+    responses(
+        (status = 204),
+        (status = "default", body = Error)
+    )
+)]
 #[post("/disable")]
 pub async fn disable_account(
     authifier: &State<Authifier>,
@@ -21,7 +28,6 @@ pub async fn disable_account(
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use crate::test::*;
 

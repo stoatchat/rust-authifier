@@ -8,7 +8,7 @@ use rocket::State;
 use rocket_empty::EmptyResponse;
 
 /// # Account Data
-#[derive(Serialize, Deserialize, JsonSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct DataCreateAccount {
     /// Valid email address
     pub email: String,
@@ -23,7 +23,13 @@ pub struct DataCreateAccount {
 /// # Create Account
 ///
 /// Create a new account.
-#[openapi(tag = "Account")]
+#[utoipa::path(
+    tag = "Account",
+    responses(
+        (status = 204),
+        (status = "default", body = Error)
+    )
+)]
 #[post("/create", data = "<data>")]
 pub async fn create_account(
     authifier: &State<Authifier>,
@@ -78,7 +84,6 @@ pub async fn create_account(
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use crate::test::*;
 

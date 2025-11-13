@@ -1,9 +1,10 @@
 //! Fetch your account
 //! GET /account
-use authifier::{models::Account, Result};
+use authifier::{models::Account, Error, Result};
 use rocket::serde::json::Json;
 
-#[derive(Serialize, Deserialize, JsonSchema)]
+/// Account Info
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct AccountInfo {
     #[serde(rename = "_id")]
     pub id: String,
@@ -22,14 +23,20 @@ impl From<Account> for AccountInfo {
 /// # Fetch Account
 ///
 /// Fetch account information from the current session.
-#[openapi(tag = "Account")]
+#[utoipa::path(
+    tag = "Account",
+    security(("User Token" = [])),
+    responses(
+        (status = 200, body = AccountInfo),
+        (status = "default", body = Error)
+    )
+)]
 #[get("/")]
 pub async fn fetch_account(account: Account) -> Result<Json<AccountInfo>> {
     Ok(Json(account.into()))
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use crate::test::*;
 

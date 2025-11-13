@@ -1,8 +1,7 @@
 //! Delete an account.
 //! POST /account/delete
 use authifier::{
-    models::{Account, ValidatedTicket},
-    Authifier, Result,
+    Authifier, Error, Result, models::{Account, ValidatedTicket}
 };
 use rocket::State;
 use rocket_empty::EmptyResponse;
@@ -10,7 +9,14 @@ use rocket_empty::EmptyResponse;
 /// # Delete Account
 ///
 /// Request to have an account deleted.
-#[openapi(tag = "Account")]
+#[utoipa::path(
+    tag = "Account",
+    security(("User Token" = [], "MFA Ticket" = [])),
+    responses(
+        (status = 204),
+        (status = "default", body = Error)
+    )
+)]
 #[post("/delete")]
 pub async fn delete_account(
     authifier: &State<Authifier>,
@@ -24,7 +30,6 @@ pub async fn delete_account(
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use crate::test::*;
 

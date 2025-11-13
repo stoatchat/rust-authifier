@@ -1,6 +1,6 @@
 /// Web Push subscription
 #[derive(Debug, Serialize, Deserialize, Clone)]
-#[cfg_attr(feature = "schemas", derive(JsonSchema))]
+#[cfg_attr(feature = "utoipa", derive(ToSchema))]
 pub struct WebPushSubscription {
     pub endpoint: String,
     pub p256dh: String,
@@ -9,7 +9,7 @@ pub struct WebPushSubscription {
 
 /// Session information
 #[derive(Debug, Serialize, Deserialize, Clone)]
-#[cfg_attr(feature = "schemas", derive(JsonSchema))]
+#[cfg_attr(feature = "utoipa", derive(ToSchema))]
 pub struct Session {
     /// Unique Id
     #[serde(rename = "_id")]

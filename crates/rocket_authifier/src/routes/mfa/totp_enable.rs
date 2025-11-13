@@ -1,7 +1,7 @@
 //! Generate a new secret for TOTP.
 //! POST /mfa/totp
 use authifier::models::{Account, MFAResponse};
-use authifier::{Authifier, Result};
+use authifier::{Authifier, Error, Result};
 use rocket::serde::json::Json;
 use rocket::State;
 use rocket_empty::EmptyResponse;
@@ -9,7 +9,14 @@ use rocket_empty::EmptyResponse;
 /// # Enable TOTP 2FA
 ///
 /// Generate a new secret for TOTP.
-#[openapi(tag = "MFA")]
+#[utoipa::path(
+    tag = "MFA",
+    security(("User Token" = [])),
+    responses(
+        (status = 204),
+        (status = "default", body = Error)
+    )
+)]
 #[put("/totp", data = "<data>")]
 pub async fn totp_enable(
     authifier: &State<Authifier>,
@@ -24,7 +31,6 @@ pub async fn totp_enable(
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use authifier::models::totp::Totp;
 

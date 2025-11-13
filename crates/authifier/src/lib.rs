@@ -11,9 +11,9 @@ extern crate log;
 #[macro_use]
 extern crate serde_json;
 
-#[cfg(feature = "schemas")]
+#[cfg(feature = "utoipa")]
 #[macro_use]
-extern crate schemars;
+extern crate utoipa;
 #[cfg(feature = "database-mongodb")]
 #[macro_use]
 extern crate bson;

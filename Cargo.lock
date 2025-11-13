@@ -266,16 +266,14 @@ dependencies = [
  "rand",
  "regex",
  "reqwest",
- "revolt_okapi",
- "revolt_rocket_okapi",
  "rocket",
  "rust-argon2",
- "schemars",
  "serde",
  "serde_json",
  "sha1",
  "totp-lite",
  "ulid",
+ "utoipa",
  "validator",
 ]
 
@@ -2407,19 +2405,17 @@ version = "1.0.15"
 dependencies = [
  "async-std",
  "authifier",
- "base32",
  "chrono",
  "iso8601-timestamp",
  "mongodb",
  "regex",
  "reqwest",
- "revolt_okapi",
- "revolt_rocket_okapi",
  "rocket",
  "rocket_empty",
- "schemars",
  "serde",
  "serde_json",
+ "utoipa",
+ "utoipa-scalar",
 ]
 
 [[package]]
@@ -2586,7 +2582,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "09c024468a378b7e36765cd36702b7a90cc3cba11654f6685c8f233408e89e92"
 dependencies = [
  "dyn-clone",
- "indexmap 1.9.3",
  "schemars_derive",
  "serde",
  "serde_json",
@@ -3398,6 +3393,42 @@ name = "utf8_iter"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6c140620e7ffbb22c2dee59cafe6084a59b5ffc27a8859a5f0d494b5d52b6be"
+
+[[package]]
+name = "utoipa"
+version = "5.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2fcc29c80c21c31608227e0912b2d7fddba57ad76b606890627ba8ee7964e993"
+dependencies = [
+ "indexmap 2.7.0",
+ "serde",
+ "serde_json",
+ "utoipa-gen",
+]
+
+[[package]]
+name = "utoipa-gen"
+version = "5.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6d79d08d92ab8af4c5e8a6da20c47ae3f61a0f1dabc1997cdf2d082b757ca08b"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "regex",
+ "syn 2.0.90",
+]
+
+[[package]]
+name = "utoipa-scalar"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "59559e1509172f6b26c1cdbc7247c4ddd1ac6560fe94b584f81ee489b141f719"
+dependencies = [
+ "rocket",
+ "serde",
+ "serde_json",
+ "utoipa",
+]
 
 [[package]]
 name = "uuid"

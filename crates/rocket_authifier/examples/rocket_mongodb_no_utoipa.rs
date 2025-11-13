@@ -1,9 +1,8 @@
-//! Run example with `cargo run --example rocket_mongodb_no_okapi --features example`
+//! Run example with `cargo run --example rocket_mongodb_no_okapi`
 
 #[macro_use]
 extern crate rocket;
 
-#[cfg(feature = "example")]
 #[launch]
 async fn rocket() -> _ {
     use authifier::database::MongoDb;
@@ -30,16 +29,11 @@ async fn rocket() -> _ {
         .manage(authifier)
         .mount(
             "/auth/account",
-            rocket_authifier::routes::account::routes().0,
+            rocket_authifier::routes::account::routes(),
         )
         .mount(
             "/auth/session",
-            rocket_authifier::routes::session::routes().0,
+            rocket_authifier::routes::session::routes(),
         )
-        .mount("/auth/mfa", rocket_authifier::routes::mfa::routes().0)
-}
-
-#[cfg(not(feature = "example"))]
-fn main() {
-    panic!("Enable `example` feature to run this example!");
+        .mount("/auth/mfa", rocket_authifier::routes::mfa::routes())
 }

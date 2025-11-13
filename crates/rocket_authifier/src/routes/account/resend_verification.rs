@@ -1,11 +1,11 @@
 //! Resend account verification email
 //! POST /account/reverify
-use authifier::{models::EmailVerification, util::normalise_email, Authifier, Result};
+use authifier::{Authifier, Error, Result, models::EmailVerification, util::normalise_email};
 use rocket::{serde::json::Json, State};
 use rocket_empty::EmptyResponse;
 
 /// # Resend Information
-#[derive(Serialize, Deserialize, JsonSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct DataResendVerification {
     /// Email associated with the account
     pub email: String,
@@ -16,7 +16,13 @@ pub struct DataResendVerification {
 /// # Resend Verification
 ///
 /// Resend account creation verification email.
-#[openapi(tag = "Account")]
+#[utoipa::path(
+    tag = "Account",
+    responses(
+        (status = 204),
+        (status = "default", body = Error)
+    )
+)]
 #[post("/reverify", data = "<data>")]
 pub async fn resend_verification(
     authifier: &State<Authifier>,
@@ -66,7 +72,6 @@ pub async fn resend_verification(
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use iso8601_timestamp::Timestamp;
 

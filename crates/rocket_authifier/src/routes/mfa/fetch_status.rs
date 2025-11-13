@@ -1,12 +1,11 @@
 //! Fetch MFA status of an account.
 //! GET /mfa
 use authifier::{
-    models::{Account, MultiFactorAuthentication},
-    Result,
+    Error, Result, models::{Account, MultiFactorAuthentication}
 };
 use rocket::serde::json::Json;
 
-#[derive(Debug, Serialize, Deserialize, JsonSchema, Default)]
+#[derive(Debug, Serialize, Deserialize, ToSchema, Default)]
 pub struct MultiFactorStatus {
     email_otp: bool,
     trusted_handover: bool,
@@ -33,14 +32,20 @@ impl From<MultiFactorAuthentication> for MultiFactorStatus {
 /// # MFA Status
 ///
 /// Fetch MFA status of an account.
-#[openapi(tag = "MFA")]
+#[utoipa::path(
+    tag = "MFA",
+    security(("User Token" = [])),
+    responses(
+        (status = 200, body = MultiFactorStatus),
+        (status = "default", body = Error)
+    )
+)]
 #[get("/")]
 pub async fn fetch_status(account: Account) -> Result<Json<MultiFactorStatus>> {
     Ok(Json(account.mfa.into()))
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use crate::test::*;
 

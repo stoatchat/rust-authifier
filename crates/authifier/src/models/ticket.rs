@@ -1,6 +1,6 @@
 /// Multi-factor auth ticket
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "schemas", derive(JsonSchema))]
+#[cfg_attr(feature = "utoipa", derive(ToSchema))]
 pub struct MFATicket {
     /// Unique Id
     #[serde(rename = "_id")]

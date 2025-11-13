@@ -11,9 +11,10 @@ use rocket::serde::json::Json;
 use rocket::State;
 
 /// # Login Data
-#[derive(Serialize, Deserialize, JsonSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 #[serde(untagged)]
 pub enum DataLogin {
+    #[schema(title = "Email")]
     Email {
         /// Email
         email: String,
@@ -22,6 +23,7 @@ pub enum DataLogin {
         /// Friendly name used for the session
         friendly_name: Option<String>,
     },
+    #[schema(title = "MFA")]
     MFA {
         /// Unvalidated or authorised MFA ticket
         ///
@@ -36,14 +38,17 @@ pub enum DataLogin {
     },
 }
 
-#[derive(Serialize, Deserialize, JsonSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 #[serde(tag = "result")]
 pub enum ResponseLogin {
+    #[schema(title = "Success")]
     Success(Session),
+    #[schema(title = "MFA")]
     MFA {
         ticket: String,
         allowed_methods: Vec<MFAMethod>,
     },
+    #[schema(title = "Disabled")]
     Disabled {
         user_id: String,
     },
@@ -52,7 +57,13 @@ pub enum ResponseLogin {
 /// # Login
 ///
 /// Login to an account.
-#[openapi(tag = "Session")]
+#[utoipa::path(
+    tag = "Session",
+    responses(
+        (status = 200, body = ResponseLogin),
+        (status = "default", body = Error)
+    )
+)]
 #[post("/login", data = "<data>")]
 pub async fn login(
     authifier: &State<Authifier>,
@@ -203,7 +214,6 @@ pub async fn login(
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use iso8601_timestamp::Timestamp;
 

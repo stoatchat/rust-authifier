@@ -1,13 +1,13 @@
 //! Send a password reset email
 //! POST /account/reset_password
 use authifier::util::normalise_email;
-use authifier::{Authifier, Result};
+use authifier::{Authifier, Error, Result};
 use rocket::serde::json::Json;
 use rocket::State;
 use rocket_empty::EmptyResponse;
 
 /// # Reset Information
-#[derive(Serialize, Deserialize, JsonSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct DataSendPasswordReset {
     /// Email associated with the account
     pub email: String,
@@ -18,7 +18,13 @@ pub struct DataSendPasswordReset {
 /// # Send Password Reset
 ///
 /// Send an email to reset account password.
-#[openapi(tag = "Account")]
+#[utoipa::path(
+    tag = "Account",
+    responses(
+        (status = 204),
+        (status = "default", body = Error)
+    )
+)]
 #[post("/reset_password", data = "<data>")]
 pub async fn send_password_reset(
     authifier: &State<Authifier>,
@@ -56,7 +62,6 @@ pub async fn send_password_reset(
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use crate::test::*;
 

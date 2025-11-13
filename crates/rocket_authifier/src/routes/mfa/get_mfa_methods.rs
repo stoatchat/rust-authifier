@@ -1,19 +1,25 @@
 //! Fetch available MFA methods.
 //! GET /mfa/methods
-use authifier::models::{Account, MFAMethod};
+use authifier::{Error, models::{Account, MFAMethod}};
 use rocket::serde::json::Json;
 
 /// # Get MFA Methods
 ///
 /// Fetch available MFA methods.
-#[openapi(tag = "MFA")]
+#[utoipa::path(
+    tag = "MFA",
+    security(("User Token" = [])),
+    responses(
+        (status = 200, body = inline(Vec<MFAMethod>)),
+        (status = "default", body = Error)
+    )
+)]
 #[get("/methods")]
 pub async fn get_mfa_methods(account: Account) -> Json<Vec<MFAMethod>> {
     Json(account.mfa.get_methods())
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use authifier::models::totp::Totp;
 

@@ -1,13 +1,13 @@
 //! Change account email.
 //! PATCH /account/change/email
 use authifier::models::Account;
-use authifier::{Authifier, Result};
+use authifier::{Authifier, Result, Error};
 use rocket::serde::json::Json;
 use rocket::State;
 use rocket_empty::EmptyResponse;
 
 /// # Change Data
-#[derive(Serialize, Deserialize, JsonSchema)]
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct DataChangeEmail {
     /// Valid email address
     pub email: String,
@@ -18,7 +18,14 @@ pub struct DataChangeEmail {
 /// # Change Email
 ///
 /// Change the associated account email.
-#[openapi(tag = "Account")]
+#[utoipa::path(
+    tag = "Account",
+    security(("User Token" = [])),
+    responses(
+        (status = 204),
+        (status = "default", body = Error)
+    )
+)]
 #[patch("/change/email", data = "<data>")]
 pub async fn change_email(
     authifier: &State<Authifier>,
@@ -44,7 +51,6 @@ pub async fn change_email(
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use crate::{routes::account::verify_email::ResponseVerify, test::*};
 

@@ -2,14 +2,21 @@
 //! DELETE /mfa/totp
 use authifier::models::totp::Totp;
 use authifier::models::{Account, ValidatedTicket};
-use authifier::{Authifier, Result};
+use authifier::{Authifier, Error, Result};
 use rocket::State;
 use rocket_empty::EmptyResponse;
 
 /// # Disable TOTP 2FA
 ///
 /// Disable TOTP 2FA for an account.
-#[openapi(tag = "MFA")]
+#[utoipa::path(
+    tag = "MFA",
+    security(("User Token" = [], "MFA Ticket" = [])),
+    responses(
+        (status = 204),
+        (status = "default", body = Error)
+    )
+)]
 #[delete("/totp")]
 pub async fn totp_disable(
     authifier: &State<Authifier>,
@@ -24,7 +31,6 @@ pub async fn totp_disable(
 }
 
 #[cfg(test)]
-#[cfg(feature = "test")]
 mod tests {
     use crate::test::*;
 

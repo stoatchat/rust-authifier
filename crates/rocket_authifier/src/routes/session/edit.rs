@@ -14,12 +14,12 @@ pub struct DataEditSession {
     pub friendly_name: String,
 }
 
-/// # Edit Session
+/// Edit Session
 ///
 /// Edit current session information.
 #[utoipa::path(
     tag = "Session",
-    security(("User Token" = [])),
+    security(("Session-Token" = [])),
     responses(
         (status = 200, body = SessionInfo),
         (status = "default", body = Error)

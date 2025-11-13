@@ -6,12 +6,12 @@ use authifier::{Authifier, Error, Result};
 use rocket::State;
 use rocket_empty::EmptyResponse;
 
-/// # Disable TOTP 2FA
+/// Disable TOTP 2FA
 ///
 /// Disable TOTP 2FA for an account.
 #[utoipa::path(
     tag = "MFA",
-    security(("User Token" = [], "MFA Ticket" = [])),
+    security(("Session-Token" = [], "MFA-Ticket" = [])),
     responses(
         (status = 204),
         (status = "default", body = Error)

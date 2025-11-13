@@ -16,12 +16,12 @@ pub struct DataChangePassword {
     pub current_password: String,
 }
 
-/// # Change Password
+/// Change Password
 ///
 /// Change the current account password.
 #[utoipa::path(
     tag = "Account",
-    security(("User Token" = [])),
+    security(("Session-Token" = [])),
     responses(
         (status = 204),
         (status = "default", body = Error)

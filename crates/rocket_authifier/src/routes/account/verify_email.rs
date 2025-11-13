@@ -17,12 +17,12 @@ pub enum ResponseVerify {
     },
 }
 
-/// # Verify Email
+/// Verify Email
 ///
 /// Verify an email address.
 #[utoipa::path(
     tag = "Account",
-    security(("User Token" = [])),
+    security(("Session-Token" = [])),
     responses(
         (status = 200, body = ResponseVerify),
         (status = "default", body = Error)

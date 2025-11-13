@@ -20,7 +20,7 @@ pub struct DataCreateAccount {
     pub captcha: Option<String>,
 }
 
-/// # Create Account
+/// Create Account
 ///
 /// Create a new account.
 #[utoipa::path(

@@ -1,7 +1,8 @@
 //! Fetch MFA status of an account.
 //! GET /mfa
 use authifier::{
-    Error, Result, models::{Account, MultiFactorAuthentication}
+    models::{Account, MultiFactorAuthentication},
+    Error, Result,
 };
 use rocket::serde::json::Json;
 
@@ -29,12 +30,12 @@ impl From<MultiFactorAuthentication> for MultiFactorStatus {
     }
 }
 
-/// # MFA Status
+/// MFA Status
 ///
 /// Fetch MFA status of an account.
 #[utoipa::path(
     tag = "MFA",
-    security(("User Token" = [])),
+    security(("Session-Token" = [])),
     responses(
         (status = 200, body = MultiFactorStatus),
         (status = "default", body = Error)

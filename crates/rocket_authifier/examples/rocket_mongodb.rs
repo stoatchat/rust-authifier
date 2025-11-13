@@ -36,7 +36,6 @@ async fn rocket() -> _ {
     };
 
     rocket::build()
-        .configure(rocket::Config { port: 8002, ..Default::default() })
         .mount("/auth/account", rocket_authifier::routes::account::routes())
         .mount("/auth/session", rocket_authifier::routes::session::routes())
         .mount("/auth/mfa", rocket_authifier::routes::mfa::routes())

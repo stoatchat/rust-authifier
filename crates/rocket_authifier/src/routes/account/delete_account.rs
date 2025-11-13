@@ -6,12 +6,12 @@ use authifier::{
 use rocket::State;
 use rocket_empty::EmptyResponse;
 
-/// # Delete Account
+/// Delete Account
 ///
 /// Request to have an account deleted.
 #[utoipa::path(
     tag = "Account",
-    security(("User Token" = [], "MFA Ticket" = [])),
+    security(("Session-Token" = [], "MFA-Ticket" = [])),
     responses(
         (status = 204),
         (status = "default", body = Error)

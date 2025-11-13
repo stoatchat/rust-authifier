@@ -20,7 +20,7 @@ pub struct DataPasswordReset {
     pub remove_sessions: bool,
 }
 
-/// # Password Reset
+/// Password Reset
 ///
 /// Confirm password reset and change the password.
 #[utoipa::path(

@@ -21,12 +21,12 @@ impl From<Session> for SessionInfo {
     }
 }
 
-/// # Fetch Sessions
+/// Fetch Sessions
 ///
 /// Fetch all sessions associated with this account.
 #[utoipa::path(
     tag = "Session",
-    security(("User Token" = [])),
+    security(("Session-Token" = [])),
     responses(
         (status = 200, body = inline(Vec<SessionInfo>)),
         (status = "default", body = Error)

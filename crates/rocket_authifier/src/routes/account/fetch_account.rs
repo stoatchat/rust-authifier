@@ -20,12 +20,12 @@ impl From<Account> for AccountInfo {
     }
 }
 
-/// # Fetch Account
+/// Fetch Account
 ///
 /// Fetch account information from the current session.
 #[utoipa::path(
     tag = "Account",
-    security(("User Token" = [])),
+    security(("Session-Token" = [])),
     responses(
         (status = 200, body = AccountInfo),
         (status = "default", body = Error)

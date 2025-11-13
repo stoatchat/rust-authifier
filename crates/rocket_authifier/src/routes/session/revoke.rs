@@ -4,12 +4,12 @@ use authifier::{models::Session, Authifier, Error, Result};
 use rocket::State;
 use rocket_empty::EmptyResponse;
 
-/// # Revoke Session
+/// Revoke Session
 ///
 /// Delete a specific active session.
 #[utoipa::path(
     tag = "Session",
-    security(("User Token" = [])),
+    security(("Session-Token" = [])),
     responses(
         (status = 204),
         (status = "default", body = Error)

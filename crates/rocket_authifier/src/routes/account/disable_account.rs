@@ -7,12 +7,12 @@ use authifier::{
 use rocket::State;
 use rocket_empty::EmptyResponse;
 
-/// # Disable Account
+/// Disable Account
 ///
 /// Disable an account.
 #[utoipa::path(
     tag = "Account",
-    security(("User Token" = [], "MFA Ticket" = [])),
+    security(("Session-Token" = [], "MFA-Ticket" = [])),
     responses(
         (status = 204),
         (status = "default", body = Error)

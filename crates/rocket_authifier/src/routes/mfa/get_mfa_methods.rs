@@ -3,12 +3,12 @@
 use authifier::{Error, models::{Account, MFAMethod}};
 use rocket::serde::json::Json;
 
-/// # Get MFA Methods
+/// Get MFA Methods
 ///
 /// Fetch available MFA methods.
 #[utoipa::path(
     tag = "MFA",
-    security(("User Token" = [])),
+    security(("Session-Token" = [])),
     responses(
         (status = 200, body = inline(Vec<MFAMethod>)),
         (status = "default", body = Error)

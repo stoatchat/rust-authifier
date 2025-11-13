@@ -13,7 +13,7 @@ pub struct DataResendVerification {
     pub captcha: Option<String>,
 }
 
-/// # Resend Verification
+/// Resend Verification
 ///
 /// Resend account creation verification email.
 #[utoipa::path(

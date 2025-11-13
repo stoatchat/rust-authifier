@@ -11,12 +11,12 @@ pub struct ResponseTotpSecret {
     secret: String,
 }
 
-/// # Generate TOTP Secret
+/// Generate TOTP Secret
 ///
 /// Generate a new secret for TOTP.
 #[utoipa::path(
     tag = "MFA",
-    security(("User Token" = [], "MFA Ticket" = [])),
+    security(("Session-Token" = [], "MFA-Ticket" = [])),
     responses(
         (status = 200, body = ResponseTotpSecret),
         (status = "default", body = Error)

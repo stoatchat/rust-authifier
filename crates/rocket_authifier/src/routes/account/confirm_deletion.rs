@@ -12,12 +12,12 @@ pub struct DataAccountDeletion {
     pub token: String,
 }
 
-/// # Confirm Account Deletion
+/// Confirm Account Deletion
 ///
 /// Schedule an account for deletion by confirming the received token.
 #[utoipa::path(
     tag = "Account",
-    security(("User Token" = [])),
+    security(("Session-Token" = [])),
     responses(
         (status = 204),
         (status = "default", body = Error)

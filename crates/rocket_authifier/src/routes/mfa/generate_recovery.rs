@@ -5,12 +5,12 @@ use authifier::{Authifier, Error, Result};
 use rocket::serde::json::Json;
 use rocket::State;
 
-/// # Generate Recovery Codes
+/// Generate Recovery Codes
 ///
 /// Re-generate recovery codes for an account.
 #[utoipa::path(
     tag = "MFA",
-    security(("User Token" = [], "MFA Ticket" = [])),
+    security(("Session-Token" = [], "MFA-Ticket" = [])),
     responses(
         (status = 200, body = inline(Vec<String>)),
         (status = "default", body = Error)

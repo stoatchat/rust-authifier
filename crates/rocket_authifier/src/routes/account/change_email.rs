@@ -15,12 +15,12 @@ pub struct DataChangeEmail {
     pub current_password: String,
 }
 
-/// # Change Email
+/// Change Email
 ///
 /// Change the associated account email.
 #[utoipa::path(
     tag = "Account",
-    security(("User Token" = [])),
+    security(("Session-Token" = [])),
     responses(
         (status = 204),
         (status = "default", body = Error)

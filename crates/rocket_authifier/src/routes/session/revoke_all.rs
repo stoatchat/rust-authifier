@@ -6,12 +6,12 @@ use authifier::{
 use rocket::State;
 use rocket_empty::EmptyResponse;
 
-/// # Delete All Sessions
+/// Delete All Sessions
 ///
 /// Delete all active sessions, optionally including current one.
 #[utoipa::path(
     tag = "Session",
-    security(("User Token" = [])),
+    security(("Session-Token" = [])),
     responses(
         (status = 204),
         (status = "default", body = Error)

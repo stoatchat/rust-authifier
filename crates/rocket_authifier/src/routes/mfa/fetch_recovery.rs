@@ -1,16 +1,17 @@
 //! Fetch recovery codes for an account.
 //! POST /mfa/recovery
 use authifier::{
-    Error, Result, models::{Account, ValidatedTicket}
+    models::{Account, ValidatedTicket},
+    Error, Result,
 };
 use rocket::serde::json::Json;
 
-/// # Fetch Recovery Codes
+/// Fetch Recovery Codes
 ///
 /// Fetch recovery codes for an account.
 #[utoipa::path(
     tag = "MFA",
-    security(("User Token" = [], "MFA Ticket" = [])),
+    security(("Session-Token" = [], "MFA-Ticket" = [])),
     responses(
         (status = 200, body = inline(Vec<String>)),
         (status = "default", body = Error)

@@ -5,12 +5,12 @@ use authifier::{Authifier, Error, Result};
 use rocket::serde::json::Json;
 use rocket::State;
 
-/// # Create MFA ticket
+/// Create MFA ticket
 ///
 /// Create a new MFA ticket or validate an existing one.
 #[utoipa::path(
     tag = "MFA",
-    security(("User Token" = []), ("MFA Ticket" = [])),
+    security(("Session-Token" = []), ("MFA-Ticket" = [])),
     responses(
         (status = 200, body = MFAResponse),
         (status = "default", body = Error)

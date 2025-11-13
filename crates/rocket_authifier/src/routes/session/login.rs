@@ -54,7 +54,7 @@ pub enum ResponseLogin {
     },
 }
 
-/// # Login
+/// Login
 ///
 /// Login to an account.
 #[utoipa::path(

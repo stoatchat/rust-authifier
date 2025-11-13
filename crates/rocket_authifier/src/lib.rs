@@ -30,20 +30,18 @@ impl Modify for SecurityAddon {
         let components = openapi.components.get_or_insert_default();
 
         components.add_security_scheme(
-            "User Token",
+            "Session-Token",
             SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::new(
                 "X-Session-Token".to_string(),
             ))),
         );
 
         components.add_security_scheme(
-            "MFA Ticket",
+            "MFA-Ticket",
             SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::new("X-MFA-Ticket".to_string()))),
         );
     }
 }
 
 #[test]
-fn test() {
-
-}
+fn test() {}

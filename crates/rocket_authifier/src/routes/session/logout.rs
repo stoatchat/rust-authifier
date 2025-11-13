@@ -4,12 +4,12 @@ use authifier::{Authifier, Error, Result, models::Session};
 use rocket::State;
 use rocket_empty::EmptyResponse;
 
-/// # Logout
+/// Logout
 ///
 /// Delete current session.
 #[utoipa::path(
     tag = "Session",
-    security(("User Token" = [])),
+    security(("Session-Token" = [])),
     responses(
         (status = 204),
         (status = "default", body = Error)

@@ -15,7 +15,7 @@ pub struct DataSendPasswordReset {
     pub captcha: Option<String>,
 }
 
-/// # Send Password Reset
+/// Send Password Reset
 ///
 /// Send an email to reset account password.
 #[utoipa::path(

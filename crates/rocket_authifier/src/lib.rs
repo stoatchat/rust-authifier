@@ -1,6 +1,6 @@
 use utoipa::{
     openapi::security::{ApiKey, ApiKeyValue, SecurityScheme},
-    Modify, OpenApi,
+    Modify,
 };
 
 #[macro_use]
@@ -23,7 +23,7 @@ pub mod routes;
 #[cfg(test)]
 pub mod test;
 
-struct SecurityAddon;
+pub struct SecurityAddon;
 
 impl Modify for SecurityAddon {
     fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {

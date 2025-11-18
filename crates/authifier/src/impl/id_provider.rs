@@ -64,22 +64,20 @@ impl IdProvider {
             Endpoints::Manual { authorization, .. } => *authorization.clone(),
         };
 
-        let server_url = authifier
+        let mut callback_url = authifier
             .config
             .server_url
-            .as_ref()
+            .clone()
             .expect("server must have a URL");
 
-        let callback_url = format!(
-            "https://{}/auth/sso/callback",
-            server_url.domain().expect("server must have a valid URL")
-        );
+        callback_url.set_path("/auth/sso/callback");
+        callback_url.set_scheme("https").unwrap();
 
         // Append the client ID, redirect URI and state to the authorization URI
         {
             authorization_uri.query_pairs_mut().extend_pairs([
                 ("client_id", self.credentials.client_id()),
-                ("redirect_uri", &callback_url),
+                ("redirect_uri", &callback_url.as_str()),
                 ("response_type", "code"),
                 ("scope", &*self.scopes.join(" ")),
                 ("state", &*state),
@@ -109,8 +107,6 @@ impl IdProvider {
             ..Callback::new(self.id.clone(), redirect_uri.clone())
         };
 
-        eprintln!("{callback:?}");
-
         authifier.database.save_callback(&callback).await?;
 
         Ok((state, authorization_uri))
@@ -133,21 +129,19 @@ impl IdProvider {
             Endpoints::Manual { token, .. } => *token.clone(),
         };
 
-        let server_url = authifier
+        let mut callback_url = authifier
             .config
             .server_url
-            .as_ref()
+            .clone()
             .expect("server must have a URL");
 
-        let callback_url = format!(
-            "https://{}/auth/sso/callback",
-            server_url.domain().expect("server must have a valid URL")
-        );
+        callback_url.set_path("/auth/sso/callback");
+        callback_url.set_scheme("https").unwrap();
 
         // Build request for access token with authorization code
         let body = AccessTokenRequest::AuthorizationCode(AuthorizationCodeGrant {
             code: code.to_owned(),
-            redirect_uri: Some(callback_url.parse().unwrap()),
+            redirect_uri: Some(callback_url),
             code_verifier: callback.code_verifier.clone(),
         });
 
@@ -265,7 +259,7 @@ impl IdProvider {
             self.credentials.client_id(),
             match &self.credentials {
                 Credentials::Basic { client_secret, .. }
-                | Credentials::Post { client_secret, .. } => Some(&**client_secret),
+                | Credentials::Post { client_secret, .. } => Some(client_secret.as_str()),
                 _ => None,
             },
         );
@@ -311,7 +305,7 @@ impl IdProvider {
             .clone()
             .validate(self.issuer.as_ref().trim_end_matches("/"))
             .map_err(|e| {
-                eprintln!("{e} {:?} {:?}", self.issuer.as_str(), &metadata.issuer);
+                log::error!("{e} {:?} {:?}", self.issuer.as_str(), &metadata.issuer);
 
                 Error::InvalidEndpoints
             })

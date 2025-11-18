@@ -16,7 +16,7 @@ pub struct DummyDb {
     pub accounts: Arc<Mutex<HashMap<String, Account>>>,
     pub callbacks: Arc<Mutex<HashMap<String, Callback>>>,
     pub invites: Arc<Mutex<HashMap<String, Invite>>>,
-    pub secrets: Arc<Mutex<HashMap<(), Secret>>>,
+    pub secrets: Arc<Mutex<HashMap<String, Secret>>>,
     pub sessions: Arc<Mutex<HashMap<String, Session>>>,
     pub tickets: Arc<Mutex<HashMap<String, MFATicket>>>,
 }
@@ -142,7 +142,7 @@ impl AbstractDatabase for DummyDb {
     async fn find_secret(&self) -> Result<Secret> {
         let secrets = self.secrets.lock().await;
 
-        match secrets.get(&()) {
+        match secrets.values().next() {
             Some(secret) => Ok(secret.clone()),
             None => {
                 let secret = Secret::new();
@@ -207,7 +207,7 @@ impl AbstractDatabase for DummyDb {
     /// Save secret
     async fn save_secret(&self, secret: &Secret) -> Success {
         let mut secrets = self.secrets.lock().await;
-        secrets.insert((), secret.clone());
+        secrets.insert(secret.id.clone(), secret.clone());
         Ok(())
     }
 

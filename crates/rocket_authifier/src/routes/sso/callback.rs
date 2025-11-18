@@ -91,8 +91,6 @@ pub async fn callback(
         })
         .collect();
 
-    eprintln!("{:?}", &claims);
-
     // Ensure that we received the mandatory subject ID
     let Some(sub_id) = claims.get(&Claim::Id) else {
         return Err(Error::InvalidIdClaim); // Required for account mapping
@@ -148,8 +146,6 @@ pub async fn callback(
             .get(&Claim::Username)
             .and_then(|s| s.as_str().map(str::to_owned)),
     };
-
-    eprintln!("{login_token:?}");
 
     if let Some(cookie) = cookies.get("callback-id").cloned() {
         cookies.remove(cookie);

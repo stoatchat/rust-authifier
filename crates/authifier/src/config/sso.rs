@@ -96,7 +96,7 @@ impl Hash for IdProvider {
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
-pub struct SSO(HashSet<IdProvider>);
+pub struct SSO(pub HashSet<IdProvider>);
 
 impl Serialize for SSO {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>

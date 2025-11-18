@@ -222,20 +222,14 @@ pub async fn token_login(
 ) -> Result<Json<ResponseLogin>> {
     let secret = authifier.database.find_secret().await?;
 
-    eprint!("{:?}", &data.login_token);
-
-    let login_token: LoginToken = secret.validate_claims(&data.login_token).map_err(|e| {
-        eprint!("{e}");
-
-        Error::InvalidToken
-    })?;
+    let login_token = secret
+        .validate_claims::<LoginToken>(&data.login_token)
+        .map_err(|_| Error::InvalidToken)?;
 
     let record = authifier
         .database
         .find_account_by_sso_id(&login_token.iss, &login_token.sub)
         .await?;
-
-    eprintln!("{record:?}");
 
     let account = record.ok_or(Error::InvalidToken)?;
 

@@ -555,6 +555,7 @@ impl AbstractDatabase for MongoDb {
                     })?,
                 },
             )
+            .with_options(UpdateOptions::builder().upsert(true).build())
             .await
             .map_err(|_| Error::DatabaseError {
                 operation: "upsert_one",
@@ -613,7 +614,9 @@ impl AbstractDatabase for MongoDb {
     async fn save_secret(&self, secret: &Secret) -> Success {
         self.collection::<Secret>("secret")
             .update_one(
-                doc! {},
+                doc! {
+                    "_id": &secret.id
+                },
                 doc! {
                     "$set": to_document(secret).map_err(|_| Error::DatabaseError {
                         operation: "to_document",
@@ -621,6 +624,7 @@ impl AbstractDatabase for MongoDb {
                     })?,
                 },
             )
+            .with_options(UpdateOptions::builder().upsert(true).build())
             .await
             .map_err(|_| Error::DatabaseError {
                 operation: "upsert_one",

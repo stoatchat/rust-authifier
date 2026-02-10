@@ -1,23 +1,26 @@
+{ pkgs ? import (fetchTarball {
+    url = "https://github.com/NixOS/nixpkgs/archive/77ef7a29d276c6d8303aece3444d61118ef71ac2.tar.gz";
+    sha256 = "0pm4l48jq8plzrrrisimahxqlcpx7qqq9c99hylmf7p3zlc3phsy";
+  }) {},
+}:
+
 let
-  # Pinned nixpkgs, deterministic. Last updated: 11-08-2023.
-  pkgs = import (fetchTarball("https://github.com/NixOS/nixpkgs/archive/bb9707ef2ea4a5b749b362d5cf81ada3ded2c53f.tar.gz")) {};
+  nix-ld-libs = pkgs.buildEnv {
+    name = "nix-ld-libs";
+    paths = with pkgs; [
+      stdenv.cc.cc.lib
+      zlib
+      openssl
+    ];
+  };
 
-  # Rolling updates, not deterministic.
-  # pkgs = import (fetchTarball("channel:nixpkgs-unstable")) {};
 in pkgs.mkShell {
-  name = "authifierEnv";
-
-  buildInputs = [
-    # Tools
-    pkgs.git
-
-    # Rust
-    pkgs.cargo
-    pkgs.rustc
-    pkgs.clippy
-    pkgs.pkgconfig
-    pkgs.openssl.dev
+  packages = with pkgs; [
+    mise
+    pkg-config
+    openssl.dev
+    (writeShellScriptBin "fish" ''
+      exec ${pkgs.fish}/bin/fish -C 'mise activate fish | source' "$@"
+    '')
   ];
-
-  RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
 }

@@ -1,5 +1,6 @@
 //! Send a password reset email
 //! POST /account/reset_password
+use authifier::models::EmailVerification;
 use authifier::util::normalise_email;
 use authifier::{Authifier, Result};
 use rocket::serde::json::Json;
@@ -47,7 +48,9 @@ pub async fn send_password_reset(
         .find_account_by_normalised_email(&email_normalised)
         .await?
     {
-        account.start_password_reset(authifier, false).await?;
+        if !matches!(account.verification, EmailVerification::Pending { .. }) {
+            account.start_password_reset(authifier, false).await?;
+        }
     }
 
     // Never fail this route, (except for db error)

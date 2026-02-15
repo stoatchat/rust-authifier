@@ -114,7 +114,6 @@ impl SMTPSettings {
             SmtpTransport::relay(&self.host).unwrap()
         };
 
-        
         let relay = if let Some(port) = self.port {
             relay.port(port.try_into().unwrap())
         } else {
@@ -127,12 +126,16 @@ impl SMTPSettings {
             relay
         };
 
-        relay
-            .credentials(Credentials::new(
+        let relay = if !(self.username.trim().is_empty() || self.password.trim().is_empty()) {
+            relay.credentials(Credentials::new(
                 self.username.clone(),
                 self.password.clone(),
             ))
-            .build()
+        } else {
+            relay
+        };
+
+        relay.build()
     }
 
     /// Render an email template

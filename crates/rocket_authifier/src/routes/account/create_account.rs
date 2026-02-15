@@ -81,6 +81,7 @@ pub async fn create_account(
 #[cfg(feature = "test")]
 mod tests {
     use crate::test::*;
+    use authifier::config::{EmailVerificationConfig, SMTPSettings};
 
     #[async_std::test]
     async fn success() {
@@ -394,6 +395,49 @@ mod tests {
         assert_eq!(res.status(), Status::NoContent);
 
         let mail = assert_email_sendria("create_account@smtp.test".into()).await;
+        let res = client
+            .post(format!("/verify/{}", mail.code.expect("`code`")))
+            .dispatch()
+            .await;
+
+        assert_eq!(res.status(), Status::Ok);
+    }
+
+    #[async_std::test]
+    async fn success_anonymous_smtp() {
+        let mut config = test_smtp_config().await;
+        if let EmailVerificationConfig::Enabled { smtp, .. } = &mut config.email_verification {
+            smtp.username.clear();
+            smtp.password.clear();
+        }
+
+        let (authifier, _) =
+            for_test_with_config("create_account::success_anonymous_smtp", config).await;
+        let client = bootstrap_rocket_with_auth(
+            authifier,
+            routes![
+                crate::routes::account::create_account::create_account,
+                crate::routes::account::verify_email::verify_email
+            ],
+        )
+        .await;
+
+        let res = client
+            .post("/create")
+            .header(ContentType::JSON)
+            .body(
+                json!({
+                    "email": "create_account@smtp.local",
+                    "password": "valid password",
+                })
+                .to_string(),
+            )
+            .dispatch()
+            .await;
+
+        assert_eq!(res.status(), Status::NoContent);
+
+        let mail = assert_email_sendria("create_account@smtp.local".into()).await;
         let res = client
             .post(format!("/verify/{}", mail.code.expect("`code`")))
             .dispatch()

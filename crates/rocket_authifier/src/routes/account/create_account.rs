@@ -82,8 +82,6 @@ pub async fn create_account(
 mod tests {
     use crate::test::*;
     use authifier::config::{EmailVerificationConfig, SMTPSettings};
-    use chrono::Duration;
-    use iso8601_timestamp::Timestamp;
 
     #[async_std::test]
     async fn success() {

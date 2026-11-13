@@ -81,6 +81,7 @@ totp-lite = "2.0.0"
 rust-argon2 = "1.0.0"
 webauthn-rs = { version = "0.5.3", features = [
     "danger-allow-state-serialisation",
+    "danger-user-presence-only-security-keys"
 ] }
 webauthn-rs-device-catalog = "0.5.0-20230418"
 

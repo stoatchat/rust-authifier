@@ -35,7 +35,7 @@ pub use events::AuthifierEvent;
 pub use webauthn_rs as webauthn;
 
 use async_std::channel::Sender;
-use webauthn_rs::Webauthn;
+pub use webauthn_rs::{Webauthn, WebauthnBuilder};
 
 /// Authifier state
 #[derive(Default, Clone)]

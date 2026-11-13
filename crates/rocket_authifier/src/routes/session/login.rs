@@ -6,7 +6,7 @@ use std::time::Duration;
 use authifier::models::{EmailVerification, Lockout, MFAMethod, MFAResponse, MFATicket, Session};
 use authifier::util::normalise_email;
 use authifier::{
-    webauthn::{prelude::RequestChallengeResponse, Webauthn},
+    webauthn::{prelude::RequestChallengeResponse},
     Authifier, Error, Result,
 };
 use iso8601_timestamp::Timestamp;
@@ -62,7 +62,6 @@ pub enum ResponseLogin {
 #[post("/login", data = "<data>")]
 pub async fn login(
     authifier: &State<Authifier>,
-    webauthn: &State<Webauthn>,
     data: Json<DataLogin>,
 ) -> Result<Json<ResponseLogin>> {
     let (account, name) = match data.into_inner() {
@@ -154,7 +153,7 @@ pub async fn login(
                     ticket.save(authifier).await?;
 
                     let webauthn_challenge = if account.mfa.webauthn.is_enabled() {
-                        let challenge = account.mfa.webauthn.generate_auth_challenge(ticket.id.clone(), webauthn)?;
+                        let challenge = account.mfa.webauthn.generate_auth_challenge(ticket.id.clone(), &authifier.webauthn.as_ref().unwrap())?;
 
                         account.save(authifier).await?;
 
@@ -194,7 +193,7 @@ pub async fn login(
             // Verify the MFA response
             if let Some(mfa_response) = mfa_response {
                 account
-                    .consume_mfa_response(authifier, webauthn, mfa_response, Some(ticket))
+                    .consume_mfa_response(authifier, mfa_response, Some(ticket))
                     .await?;
             } else if !ticket.authorised {
                 return Err(Error::InvalidToken);

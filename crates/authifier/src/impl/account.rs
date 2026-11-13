@@ -1,6 +1,5 @@
 use chrono::Duration;
 use iso8601_timestamp::Timestamp;
-use webauthn_rs::Webauthn;
 
 use crate::{
     config::EmailVerificationConfig,
@@ -288,7 +287,6 @@ impl Account {
     pub async fn consume_mfa_response(
         &mut self,
         authifier: &Authifier,
-        webauthn: &Webauthn,
         response: MFAResponse,
         ticket: Option<MFATicket>,
     ) -> Success {
@@ -347,7 +345,7 @@ impl Account {
             MFAResponse::Webauthn { webauthn: challenge } => {
                 if allowed_methods.contains(&MFAMethod::Webauthn) {
                     if let Some(ticket) = ticket {
-                        self.mfa.webauthn.validate_auth(&ticket.id, webauthn, &challenge)
+                        self.mfa.webauthn.validate_auth(&ticket.id, authifier.webauthn.as_ref().unwrap(), &challenge)
                     } else {
                         Err(Error::OperationFailed)
                     }

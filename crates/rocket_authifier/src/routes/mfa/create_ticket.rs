@@ -12,7 +12,6 @@ use rocket::State;
 #[put("/ticket", data = "<data>")]
 pub async fn create_ticket(
     authifier: &State<Authifier>,
-    webauthn: &State<Webauthn>,
     account: Option<Account>,
     existing_ticket: Option<UnvalidatedTicket>,
     data: Json<MFAResponse>,
@@ -32,7 +31,7 @@ pub async fn create_ticket(
 
     // Validate the MFA response
     account
-        .consume_mfa_response(authifier, webauthn, data.into_inner(), existing_ticket)
+        .consume_mfa_response(authifier, data.into_inner(), existing_ticket)
         .await?;
 
     // Create a new ticket for this account

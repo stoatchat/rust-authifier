@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 use crate::{
     models::webauthn::{Webauthn, WebauthnKey},
     Error, Result,
@@ -7,9 +5,9 @@ use crate::{
 use ulid::Ulid;
 use webauthn_rs::{
     prelude::{
-        AttestationCaList, AttestationCaListBuilder, AuthenticatorAttachment,
+        AuthenticatorAttachment,
         CreationChallengeResponse, PublicKeyCredential, RegisterPublicKeyCredential,
-        RequestChallengeResponse, Uuid,
+        RequestChallengeResponse, Uuid, WebauthnError,
     },
     Webauthn as WebauthnCore,
 };
@@ -20,7 +18,7 @@ impl Webauthn {
     }
 
     pub fn is_empty(&self) -> bool {
-        self.keys.is_empty()
+        self.keys.is_empty() && self.challanges.is_empty() && self.pending.is_none()
     }
 
     pub fn register_key(
@@ -34,10 +32,14 @@ impl Webauthn {
         let ulid = Ulid::from_string(account_id).unwrap();
 
         // TODO: fill this list somehow (???)
-        let attestation_ca_list: AttestationCaList = AttestationCaListBuilder::new().build();
+        // let mut builder = AttestationCaListBuilder::new();
+        // let devices = webauthn_rs_device_catalog::Data::strict();
+        // let device = devices.iter().next().unwrap();
+        // builder.insert_device_x509(device.aaguid.ca[0].ca.clone(), device.aaguid.id.clone(), device.skus[0].display_name.clone(), BTreeMap::new()).unwrap();
+        // let attestation_ca_list = builder.build();
 
         let (challenge, reg) = webauthn
-            .start_attested_passkey_registration(
+            .start_securitykey_registration(
                 Uuid::from_u128(ulid.0),
                 account_name,
                 account_name,
@@ -47,7 +49,7 @@ impl Webauthn {
                         .map(|key| key.key.cred_id().clone())
                         .collect(),
                 ),
-                attestation_ca_list,
+                None,
                 Some(AuthenticatorAttachment::CrossPlatform),
             )
             .map_err(|_| Error::OperationFailed)?;
@@ -69,11 +71,12 @@ impl Webauthn {
 
         if let Some(reg) = self.pending.take() {
             let passkey = webauthn
-                .finish_attested_passkey_registration(cred, &reg)
-                .map_err(|_| Error::OperationFailed)?;
+                .finish_securitykey_registration(cred, &reg)
+                // .map_err(|_| Error::OperationFailed)?;
+                .unwrap();
 
             self.keys.insert(
-                passkey.cred_id().deref().clone(),
+                passkey.cred_id().clone(),
                 WebauthnKey {
                     key: passkey,
                     name: key_name,
@@ -98,7 +101,7 @@ impl Webauthn {
             .collect::<Vec<_>>();
 
         let (challenge, auth) = webauthn
-            .start_attested_passkey_authentication(&keys)
+            .start_securitykey_authentication(&keys)
             .map_err(|_| Error::OperationFailed)?;
 
         self.challanges.insert(ticket, auth);
@@ -114,15 +117,22 @@ impl Webauthn {
     ) -> Result<()> {
         let auth = self.challanges.get(ticket).ok_or(Error::OperationFailed)?;
 
-        let res = webauthn
-            .finish_attested_passkey_authentication(cred, auth)
-            .map_err(|_| Error::OperationFailed)?;
+        let res = match webauthn
+            .finish_securitykey_authentication(cred, auth)
+        {
+            Ok(res) => Ok(res),
+            Err(WebauthnError::CredentialPossibleCompromise) => {
+                self.keys.remove(cred.get_credential_id());
+                Err(Error::OperationFailed)
+            }
+            Err(_) => Err(Error::OperationFailed)
+        }?;
 
         self.challanges.remove(ticket);
 
         if res.needs_update() {
             self.keys
-                .get_mut(res.cred_id().deref())
+                .get_mut(res.cred_id())
                 .unwrap()
                 .key
                 .update_credential(&res);

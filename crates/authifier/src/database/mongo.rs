@@ -459,10 +459,11 @@ impl AbstractDatabase for MongoDb {
                     "_id": &account.id
                 },
                 doc! {
-                    "$set": to_document(account).map_err(|_| Error::DatabaseError {
-                        operation: "to_document",
-                        with: "account",
-                    })?
+                    "$set": to_document(account).unwrap(),
+                    // "$set": to_document(account).map_err(|_| Error::DatabaseError {
+                    //     operation: "to_document",
+                    //     with: "account",
+                    // })?
                 },
             )
             .with_options(UpdateOptions::builder().upsert(true).build())

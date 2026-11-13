@@ -12,7 +12,7 @@ pub struct MultiFactorStatus {
     trusted_handover: bool,
     email_mfa: bool,
     totp_mfa: bool,
-    security_key_mfa: bool,
+    webauthn_mfa: bool,
     recovery_active: bool,
 }
 
@@ -23,7 +23,7 @@ impl From<MultiFactorAuthentication> for MultiFactorStatus {
             // trusted_handover: item.enable_trusted_handover,
             // email_mfa: item.enable_email_mfa,
             totp_mfa: !item.totp_token.is_disabled(),
-            // security_key_mfa: item.security_key_token.is_some(),
+            webauthn_mfa: item.webauthn.is_enabled(),
             recovery_active: !item.recovery_codes.is_empty(),
             ..Default::default()
         }

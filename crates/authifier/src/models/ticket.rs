@@ -27,6 +27,7 @@ pub struct MFATicket {
 
     /// Webauthn challenge
     #[schemars(with = "serde_json::Value")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub webauthn_challenge: Option<RequestChallengeResponse>,
 }
 

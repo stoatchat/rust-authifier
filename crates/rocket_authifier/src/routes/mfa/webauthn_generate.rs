@@ -15,22 +15,25 @@ use rocket::State;
 #[post("/webauthn")]
 pub async fn webauthn_generate(
     authifier: &State<Authifier>,
-    webauthn: &State<Webauthn>,
     mut account: Account,
     _ticket: ValidatedTicket,
 ) -> Result<Json<Value>> {
     // Generate a new challenge
-    let challenge =
-        account
-            .mfa
+    let challenge = account.mfa.webauthn.register_key(
+        authifier
             .webauthn
-            .register_key(webauthn, &account.id, &account.email_normalised)?;
+            .as_ref()
+            // .ok_or(Error::DisallowedMFAMethod)?,
+            .unwrap(),
+        &account.id,
+        &account.email_normalised,
+    )?;
 
     // Save model to database
     account.save(authifier).await?;
 
     // Send secret to user
-    to_value(challenge)
-        .map_err(|_| Error::InternalError)
-        .map(Json)
+    Ok(Json(to_value(challenge)
+        .unwrap()
+    ))
 }
